@@ -42,14 +42,14 @@ app.get('/todos/:id', (req, res) => {
           // console.log('ID not valid');
       }
     //findByID
-      Todo.findById(id).then((todoById) => {
+      Todo.findById(id).then((todo) => {
         //success
           //if todo - send it back
             //if no todo - call succeeded, id not found - send back 404 with empty body
-          if(!todoById) {
+          if(!todo) {
             return res.status(404).send();
           } else {
-            res.send({todoById});
+            res.send({todo});
           }
       }).catch((e) => {
         //error

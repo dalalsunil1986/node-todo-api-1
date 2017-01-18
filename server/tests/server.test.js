@@ -102,5 +102,48 @@ describe('GET /todos', () => {
         .end(done);
         // /todos/123 this is valid url but 123 can' convert to objectID
       });
+    });
 
-  });
+    describe('DELETE /todos/:id', () => {
+      it('should remove a todo', (done) => {
+        var hexId = todos[1]._id.toHexString();
+
+        request(app)
+        .delete(`/todos/${hexId}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.todo._id).toBe(hexId);
+        }) //expect assertion
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          } //if err
+          //challenge: query database using findById toNotExist
+          //expect(null).toNotExist();
+          else {
+            Todo.findById(hexId).then((todo) => {
+              expect(todo).toNotExist();
+              done();
+            }).catch((e) => done(e));
+          } //else bracket
+        }); //end assertion
+      }); //it should remove a todo
+
+      it('should return 404 if todo not found', (done) => {
+        var hexId = new ObjectID().toHexString();
+
+        request(app)
+        .delete(`/todos/${hexId}`)
+        .expect(404)
+        .end(done);
+      });//it should return 404 if todo not found
+
+      it('should return 404 if object id is invalid', (done) => {
+        var hexId = new ObjectID().toHexString();
+
+        request(app)
+        .delete(`/todos/${hexId}`)
+        .expect(404)
+        .end(done);
+      });//it should return 404 if object id is invalid
+    });//describe 'DELETE' brackets

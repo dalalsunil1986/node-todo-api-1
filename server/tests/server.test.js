@@ -10,7 +10,9 @@ const todos = [{
   text: 'First test todo'
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completedAt: 333
 }];
 
 beforeEach((done) => {
@@ -147,3 +149,56 @@ describe('GET /todos', () => {
         .end(done);
       });//it should return 404 if object id is invalid
     });//describe 'DELETE' brackets
+
+    describe('PATCH /todos/:id', () => {
+      it('should update the todo', (done) => {
+        //grab id of first item
+        //url with id inside, send data as request body
+        //update text, set completed true
+        //expect 200
+        var hexId = todos[0]._id.toHexString();
+        var changedText = 'This shits tested';
+
+        var completedTime = todos[0].completedAt = 345;
+
+        request(app)
+        .patch(`/todos/${hexId}`)
+        .send({
+          completed: true,
+          text: changedText
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.todo.text).toBe(changedText);
+          expect(res.body.todo.completed).toBe(true);
+          expect(res.body.todo.completedAt).toBeA('number');
+        })
+        //expect verify that text is changed, completed is true, completedAt is a number
+          //.toBeA(number)
+          .end(done);
+        });
+
+      it('should clear completedAt when todo is not completed', (done) => {
+        //grab id of second todo item
+        var hexId = todos[1]._id.toHexString();
+        //update text to something different
+        var changedText = 'This shits tested second!';
+        //set completed to false
+        request(app)
+        .patch(`/todos/${hexId}`)
+        .send({
+          completed: false,
+          text: changedText
+        })
+        //expect 200
+        .expect(200)
+        //expect body reflects changes: text is changed, completed is false, completedAt is null
+        .expect((res) => {
+          expect(res.body.todo.text).toBe(changedText);
+          expect(res.body.todo.completed).toBe(false);
+          //.toNotExist() on expect
+          expect(res.body.todo.completedAt).toNotExist();
+        })
+          .end(done);
+      });
+    });//describe PATCH brackets

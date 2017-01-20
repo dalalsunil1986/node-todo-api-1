@@ -6,7 +6,7 @@ const {ObjectId} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
-var {Users} = require('./models/user');
+var {User} = require('./models/user');
 
 var app = express();
 const port = process.env.PORT;
@@ -112,6 +112,29 @@ app.delete('/todos/:id', (req, res) => {
       res.status(400).send();
     })
   }); //app.patch closing bracket
+
+  //POST /users
+  app.post('/users', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+    var user = new User(body);
+    // _.pick(req.body, ['email','password']);
+    // var user = new User(body);
+
+    user.save().then(() => {
+      return user.generateAuthToken();
+    }).then((token) => {
+      res.header('x-auth', token).send(user);
+    }).catch((e) => {
+      res.status(400).send(e);
+    })
+  });
+    //new instance of the model
+    //call save
+    //if things go well, return doc
+    //if things go bad, return error
+  //Use pick to get email and pword for body variable in constructor function
+    //then call save - success and error
+    //wipe todo and user server before test
 
 app.listen(port, () => {
   console.log(`started on port ${port}`);

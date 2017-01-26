@@ -116,32 +116,41 @@ app.delete('/todos/:id', (req, res) => {
 
   //POST /users
   app.post('/users', (req, res) => {
+    //new instance of the model
+    //Use pick to get email and pword for body variable in constructor function
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User(body);
     // _.pick(req.body, ['email','password']);
     // var user = new User(body);
-
+    //then call save - success and error
     user.save().then(() => {
       return user.generateAuthToken();
     }).then((token) => {
+      //if things go well, return doc
       res.header('x-auth', token).send(user);
     }).catch((e) => {
+      //if things go bad, return error
       res.status(400).send(e);
     })
   });
-    //new instance of the model
-    //call save
-    //if things go well, return doc
-    //if things go bad, return error
-  //Use pick to get email and pword for body variable in constructor function
-    //then call save - success and error
-    //wipe todo and user server before test
 
 //create private route example
-
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
+
+//POST /users/login {email, password}
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+    res.header('x-auth', token).send(user);  
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  });
+})
 
 
 app.listen(port, () => {

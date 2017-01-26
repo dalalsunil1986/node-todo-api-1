@@ -145,13 +145,21 @@ app.post('/users/login', (req, res) => {
 
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
-    res.header('x-auth', token).send(user);  
+    res.header('x-auth', token).send(user);
     });
   }).catch((e) => {
     res.status(400).send();
   });
 })
 
+//delete token off of currently logged in user (log out user)
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
 
 app.listen(port, () => {
   console.log(`started on port ${port}`);
